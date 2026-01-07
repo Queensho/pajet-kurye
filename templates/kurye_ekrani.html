@@ -1,51 +1,53 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BBK Kurye</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>BBK Kurye Havuzu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        :root { --bbk-yellow: #FFD54F; --bbk-dark: #212121; }
-        body { font-family: 'Inter', sans-serif; background: #f4f4f4; margin: 0; }
-        
-        .top-bar { background: var(--bbk-yellow); padding: 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .stats-box { display: flex; justify-content: space-between; margin-top: 15px; background: white; padding: 15px; border-radius: 15px; }
-        
-        .pool-title { padding: 20px; font-weight: bold; color: var(--bbk-dark); display: flex; align-items: center; gap: 10px; }
-        
-        .order-card { background: white; margin: 0 15px 15px; padding: 20px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 6px solid var(--bbk-yellow); }
-        .address { font-size: 0.9rem; color: #666; position: relative; padding-left: 20px; }
-        .address::before { content: '•'; position: absolute; left: 0; color: var(--bbk-yellow); font-size: 25px; top: -10px; }
-        
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #eee; pt: 15px; }
-        .btn-accept { background: var(--bbk-dark); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
+        /* BBK Sarı-Siyah Tasarımı */
+        body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
+        .order-card { background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #FFD54F; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-kap { background: #212121; color: white; padding: 10px 20px; border: none; border-radius: 8px; float: right; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <b>Merhaba, {{ kurye['isim'] }}</b>
-            <i class="fa-solid fa-bell"></i>
+    <h2 style="color: #212121;">🚀 Canlı İş Havuzu</h2>
+    <div id="havuz-listesi">
+        {% for is in havuz %}
+        <div class="order-card" id="is-{{ is['id'] }}">
+            <b>📍 Nereden:</b> {{ is['adres_al'] }} <br>
+            <b>🏁 Nereye:</b> {{ is['adres_ver'] }} <br>
+            <span style="font-size: 20px; font-weight: bold;">{{ is['fiyat'] }} TL</span>
+            <button class="btn-kap">KAP</button>
         </div>
-        <div class="stats-box">
-            <div><small>Cüzdan</small><br><b>{{ kurye['bakiye'] }} ₺</b></div>
-            <div style="text-align:right;"><small>Puan</small><br><b>⭐ {{ kurye['puan'] }}</b></div>
-        </div>
+        {% endfor %}
     </div>
 
-    <div class="pool-title"><i class="fa-solid fa-motorcycle"></i> Yeni Gönderiler</div>
+    <audio id="dutDut" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
 
-    {% for is in havuz %}
-    <div class="order-card">
-        <div class="address"><b>Nereden:</b> {{ is['adres_al'] }}</div>
-        <div class="address" style="margin-top:10px;"><b>Nereye:</b> {{ is['adres_ver'] }}</div>
-        
-        <div class="price-row">
-            <div style="font-size:1.4rem; font-weight:bold;">{{ is['fiyat'] }} ₺</div>
-            <a href="/is_al/{{ is['id'] }}"><button class="btn-accept">İŞİ KAP</button></a>
-        </div>
-    </div>
-    {% endfor %}
+    <script>
+        var socket = io();
+        var audio = document.getElementById("dutDut");
+
+        // Sunucudan yeni paket sinyali gelince çalışır
+        socket.on('yeni_paket_dustu', function(data) {
+            // 1. Sesi çal (DÜT DÜT!)
+            audio.play();
+
+            // 2. Ekrana yeni iş kartını ekle
+            var yeniKart = `
+                <div class="order-card" id="is-${data.id}" style="border-left-color: #ff0000; animation: bounce 0.5s;">
+                    <b>📍 Nereden:</b> ${data.adres_al} <br>
+                    <b>🏁 Nereye:</b> ${data.adres_ver} <br>
+                    <span style="font-size: 20px; font-weight: bold;">${data.fiyat} TL</span>
+                    <button class="btn-kap">KAP</button>
+                </div>`;
+            
+            document.getElementById('havuz-listesi').insertAdjacentHTML('afterbegin', yeniKart);
+            
+            // 3. Bildirim Göster
+            alert("Yeni İş Düştü! " + data.fiyat + " TL");
+        });
+    </script>
 </body>
 </html>
