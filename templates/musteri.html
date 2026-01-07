@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pajet Gönderi</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { width: 100%; padding: 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>🚀 Yeni Gönderi Oluştur</h2>
+    <form method="POST">
+        <input type="text" name="gonderen_tel" placeholder="Telefonunuz" required>
+        <input type="text" name="alici_adres" placeholder="Alınacak Adres" required>
+        <input type="text" name="gidilecek_yer" placeholder="Gidilecek Adres" required>
+        <input type="text" name="tel" placeholder="Alıcı Tel" required>
+        <input type="number" name="fiyat" placeholder="Fiyat (TL)" required>
+        <button type="submit">HAVUZA GÖNDER</button>
+    </form>
+</body>
+</html>
