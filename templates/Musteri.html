@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pajet | Gönderi Oluştur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .form-card { background: #1e293b; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        h2 { color: #22c55e; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #22c55e; border: none; border-radius: 10px; color: white; font-weight: bold; font-size: 16px; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="form-card">
+        <h2><i class="fa-solid fa-box-open"></i> Yeni Gönderi</h2>
+        <form method="POST">
+            <input type="text" name="gonderen_tel" placeholder="Sizin Telefonunuz" required>
+            <input type="text" name="alici_adres" placeholder="Alıcı Adresi (Nereden alınacak?)" required>
+            <input type="text" name="gidilecek_yer" placeholder="Gidilecek Yer (Nereye?)" required>
+            <input type="text" name="tel" placeholder="Alıcı Telefon Numarası" required>
+            <input type="number" name="fiyat" placeholder="Teklif Edilen Fiyat (TL)" required>
+            <button type="submit">GÖNDERİ OLUŞTUR</button>
+        </form>
+    </div>
+</body>
+</html>
