@@ -1,24 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BBK Kurye Havuzu</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <style>
-        /* BBK Sarı-Siyah Tasarımı */
-        body { font-family: sans-serif; background: #f0f0f0; margin: 0; padding: 20px; }
-        .order-card { background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #FFD54F; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-kap { background: #212121; color: white; padding: 10px 20px; border: none; border-radius: 8px; float: right; cursor: pointer; }
+        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
+        .header { background: #FFD54F; padding: 20px; margin: -15px -15px 20px; font-weight: bold; font-size: 1.2rem; }
+        .order-card { background: white; padding: 20px; border-radius: 15px; border-left: 8px solid #FFD54F; margin-bottom: 12px; transition: 0.3s; }
+        .btn-kap { background: #212121; color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; float: right; }
+        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.9); } }
     </style>
 </head>
 <body>
-    <h2 style="color: #212121;">🚀 Canlı İş Havuzu</h2>
+    <div class="header">🚀 Canlı İş Havuzu</div>
     <div id="havuz-listesi">
         {% for is in havuz %}
         <div class="order-card" id="is-{{ is['id'] }}">
-            <b>📍 Nereden:</b> {{ is['adres_al'] }} <br>
-            <b>🏁 Nereye:</b> {{ is['adres_ver'] }} <br>
-            <span style="font-size: 20px; font-weight: bold;">{{ is['fiyat'] }} TL</span>
-            <button class="btn-kap">KAP</button>
+            <b>📍 Alım:</b> {{ is['adres_al'] }}<br>
+            <b>🏁 Teslim:</b> {{ is['adres_ver'] }}<br><br>
+            <span style="font-size: 1.3rem; font-weight: 800;">{{ is['fiyat'] }} TL</span>
+            <button onclick="isiKap({{ is['id'] }})" class="btn-kap">KAP</button>
+            <div style="clear:both;"></div>
         </div>
         {% endfor %}
     </div>
@@ -29,25 +32,25 @@
         var socket = io();
         var audio = document.getElementById("dutDut");
 
-        // Sunucudan yeni paket sinyali gelince çalışır
         socket.on('yeni_paket_dustu', function(data) {
-            // 1. Sesi çal (DÜT DÜT!)
             audio.play();
-
-            // 2. Ekrana yeni iş kartını ekle
-            var yeniKart = `
-                <div class="order-card" id="is-${data.id}" style="border-left-color: #ff0000; animation: bounce 0.5s;">
-                    <b>📍 Nereden:</b> ${data.adres_al} <br>
-                    <b>🏁 Nereye:</b> ${data.adres_ver} <br>
-                    <span style="font-size: 20px; font-weight: bold;">${data.fiyat} TL</span>
-                    <button class="btn-kap">KAP</button>
-                </div>`;
-            
-            document.getElementById('havuz-listesi').insertAdjacentHTML('afterbegin', yeniKart);
-            
-            // 3. Bildirim Göster
-            alert("Yeni İş Düştü! " + data.fiyat + " TL");
+            var html = `<div class="order-card" id="is-${data.id}">
+                <b>📍 Alım:</b> ${data.adres_al}<br><b>🏁 Teslim:</b> ${data.adres_ver}<br><br>
+                <span style="font-size: 1.3rem; font-weight: 800;">${data.fiyat} TL</span>
+                <button onclick="isiKap(${data.id})" class="btn-kap">KAP</button>
+                <div style="clear:both;"></div></div>`;
+            document.getElementById('havuz-listesi').insertAdjacentHTML('afterbegin', html);
         });
+
+        socket.on('is_sil_sinyali', function(data) {
+            var el = document.getElementById('is-' + data.id);
+            if(el) { el.style.animation = "fadeOut 0.5s forwards"; setTimeout(() => el.remove(), 500); }
+        });
+
+        function isiKap(id) {
+            fetch('/is_al/' + id, { method: 'POST' })
+            .then(res => res.json()).then(data => { alert(data.message); });
+        }
     </script>
 </body>
 </html>
