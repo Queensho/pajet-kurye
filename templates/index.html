@@ -1,24 +1,50 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>Pajet Operasyon Merkezi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pajet Web Paneli</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .status { font-weight: bold; color: #e67e22; }
-        h2 { color: #2c3e50; }
+        body { font-family: sans-serif; margin: 0; background: #f0f2f5; }
+        #map { height: 400px; width: 100%; border-bottom: 4px solid #2c3e50; }
+        .stats-container { padding: 20px; }
+        .kurye-card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .badge { background: #3498db; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
+        .package-count { font-size: 24px; font-weight: bold; color: #2ecc71; }
     </style>
 </head>
 <body>
-    <h2>🚀 Pajet Kurye Listesi</h2>
-    {% for kurye in kuryeler %}
-    <div class="card">
-        <p>👤 <b>İsim:</b> {{ kurye['isim'] }}</p>
-        <p>🏍️ <b>Plaka:</b> {{ kurye['plaka'] }}</p>
-        <p class="status">📊 Durum: {{ kurye['durum'] }}</p>
+    <div id="map"></div>
+    
+    <div class="stats-container">
+        <h2>🚚 Aktif Kuryeler ve Paket Takibi</h2>
+        {% for kurye in kuryeler %}
+        <div class="kurye-card">
+            <div>
+                <strong>{{ kurye['isim'] }}</strong> <span class="badge">{{ kurye['durum'] }}</span>
+                <br><span>{{ kurye['plaka'] }}</span>
+            </div>
+            <div style="text-align: right;">
+                <div class="package-count">{{ kurye['paket_sayisi'] }}</div>
+                <small>Tamamlanan Paket</small>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([41.0082, 28.9784], 11); // İstanbul merkezli
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Kurye verilerini haritaya işaretle
+        {% for kurye in kuryeler %}
+            {% if kurye['lat'] %}
+                L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}])
+                 .addTo(map)
+                 .bindPopup("<b>{{ kurye['isim'] }}</b><br>Paket: {{ kurye['paket_sayisi'] }}");
+            {% endif %}
+        {% endfor %}
+    </script>
 </body>
 </html>
