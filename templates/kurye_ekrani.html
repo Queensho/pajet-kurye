@@ -2,35 +2,49 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurye Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BBK Kurye</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; padding: 15px; }
-        .is-karti { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #22c55e; }
-        .btn-kap { background: #22c55e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .fiyat { font-size: 20px; font-weight: bold; color: #22c55e; margin: 10px 0; }
+        :root { --bbk-yellow: #FFD54F; --bbk-dark: #212121; }
+        body { font-family: 'Inter', sans-serif; background: #f4f4f4; margin: 0; }
+        
+        .top-bar { background: var(--bbk-yellow); padding: 20px; border-radius: 0 0 25px 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .stats-box { display: flex; justify-content: space-between; margin-top: 15px; background: white; padding: 15px; border-radius: 15px; }
+        
+        .pool-title { padding: 20px; font-weight: bold; color: var(--bbk-dark); display: flex; align-items: center; gap: 10px; }
+        
+        .order-card { background: white; margin: 0 15px 15px; padding: 20px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 6px solid var(--bbk-yellow); }
+        .address { font-size: 0.9rem; color: #666; position: relative; padding-left: 20px; }
+        .address::before { content: '•'; position: absolute; left: 0; color: var(--bbk-yellow); font-size: 25px; top: -10px; }
+        
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid #eee; pt: 15px; }
+        .btn-accept { background: var(--bbk-dark); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; font-size: 1rem; }
     </style>
 </head>
 <body>
-    <h3>📦 İş Havuzu</h3>
-    {% if havuz %}
-        {% for is in havuz %}
-        <div class="is-karti">
-            <b>📍 Nereden:</b> {{ is['alici_adres'] }}<br>
-            <b>🏁 Nereye:</b> {{ is['gidilecek_yer'] }}<br>
-            <div class="fiyat">{{ is['fiyat'] }} TL</div>
-            <a href="/is_al/{{ is['id'] }}"><button class="btn-kap">İŞİ KABUL ET</button></a>
+    <div class="top-bar">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b>Merhaba, {{ kurye['isim'] }}</b>
+            <i class="fa-solid fa-bell"></i>
         </div>
-        {% endfor %}
-    {% else %}
-        <p>Şu an havuzda bekleyen iş yok.</p>
-    {% endif %}
+        <div class="stats-box">
+            <div><small>Cüzdan</small><br><b>{{ kurye['bakiye'] }} ₺</b></div>
+            <div style="text-align:right;"><small>Puan</small><br><b>⭐ {{ kurye['puan'] }}</b></div>
+        </div>
+    </div>
 
-    <hr>
-    <h3>✅ Üzerimdeki Paketler</h3>
-    {% for is in islerim %}
-    <div class="is-karti" style="border-left-color: #3b82f6;">
-        {{ is['gidilecek_yer'] }} - <b>{{ is['durum'] }}</b>
+    <div class="pool-title"><i class="fa-solid fa-motorcycle"></i> Yeni Gönderiler</div>
+
+    {% for is in havuz %}
+    <div class="order-card">
+        <div class="address"><b>Nereden:</b> {{ is['adres_al'] }}</div>
+        <div class="address" style="margin-top:10px;"><b>Nereye:</b> {{ is['adres_ver'] }}</div>
+        
+        <div class="price-row">
+            <div style="font-size:1.4rem; font-weight:bold;">{{ is['fiyat'] }} ₺</div>
+            <a href="/is_al/{{ is['id'] }}"><button class="btn-accept">İŞİ KAP</button></a>
+        </div>
     </div>
     {% endfor %}
 </body>
