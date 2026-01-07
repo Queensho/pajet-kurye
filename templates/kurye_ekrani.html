@@ -1,33 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurye Havuzu</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurye Paneli</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; padding: 15px; }
-        .card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-left: 5px solid #22c55e; }
-        .btn-kap { background: #22c55e; color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .price { font-size: 20px; color: #22c55e; font-weight: bold; }
+        .is-karti { background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid #22c55e; }
+        .btn-kap { background: #22c55e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .fiyat { font-size: 20px; font-weight: bold; color: #22c55e; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <h2>🚀 Açık İşler (Havuz)</h2>
-    {% for is in havuz %}
-    <div class="card">
-        <b>📍 Alınacak: {{ is['alici_adres'] }}</b><br>
-        <small>🏁 Hedef: {{ is['gidilecek_yer'] }}</small><br>
-        <div class="price">{{ is['fiyat'] }}₺</div>
-        <a href="/is_al/{{ is['id'] }}"><button class="btn-kap">İŞİ KAP</button></a>
-    </div>
+    <h3>📦 İş Havuzu</h3>
+    {% if havuz %}
+        {% for is in havuz %}
+        <div class="is-karti">
+            <b>📍 Nereden:</b> {{ is['alici_adres'] }}<br>
+            <b>🏁 Nereye:</b> {{ is['gidilecek_yer'] }}<br>
+            <div class="fiyat">{{ is['fiyat'] }} TL</div>
+            <a href="/is_al/{{ is['id'] }}"><button class="btn-kap">İŞİ KABUL ET</button></a>
+        </div>
+        {% endfor %}
     {% else %}
-    <p>Havuzda şu an iş yok.</p>
-    {% endfor %}
+        <p>Şu an havuzda bekleyen iş yok.</p>
+    {% endif %}
 
     <hr>
-    <h3>📦 Üzerimdeki İşler</h3>
+    <h3>✅ Üzerimdeki Paketler</h3>
     {% for is in islerim %}
-    <div class="card" style="border-left-color: #3498db;">
-        <b>{{ is['gidilecek_yer'] }}</b> - {{ is['durum'] }}
+    <div class="is-karti" style="border-left-color: #3b82f6;">
+        {{ is['gidilecek_yer'] }} - <b>{{ is['durum'] }}</b>
     </div>
     {% endfor %}
 </body>
