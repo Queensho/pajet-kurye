@@ -1,10 +1,21 @@
-<div class="bbk-form">
-    <h3>Gönderi Türü Seçin</h3>
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <div class="type-box active"><i class="fa-solid fa-motorcycle"></i><br>Moto</div>
-        <div class="type-box"><i class="fa-solid fa-car"></i><br>Araç</div>
-    </div>
-    <input type="text" placeholder="Teslim Alma Adresi">
-    <input type="text" placeholder="Teslim Etme Adresi">
-    <button class="btn-submit">Fiyat Hesapla & Gönder</button>
-</div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pajet | Gönderi Oluştur</title>
+    <style>
+        body { font-family: sans-serif; background: #212121; color: white; padding: 30px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; box-sizing: border-box; }
+        button { width: 100%; padding: 20px; background: #FFD54F; color: black; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>📦 Yeni Gönderi Gönder</h2>
+    <form method="POST">
+        <input type="text" name="adres_al" placeholder="Alınacak Adres" required>
+        <input type="text" name="adres_ver" placeholder="Teslim Edilecek Adres" required>
+        <input type="number" name="fiyat" placeholder="Teklif Edilen Ücret (TL)" required>
+        <button type="submit">HAVUZA GÖNDER</button>
+    </form>
+</body>
+</html>
