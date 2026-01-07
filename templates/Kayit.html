@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pajet Kurye Kayıt</title>
+    <style>
+        body { font-family: sans-serif; background: #ececec; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 80%; max-width: 400px; }
+        h2 { color: #2ecc71; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>🏍️ Kurye Kayıt</h2>
+        <form method="POST">
+            <input type="text" name="isim" placeholder="Ad Soyad" required>
+            <input type="text" name="tel" placeholder="Telefon (05xx...)" required>
+            <input type="text" name="plaka" placeholder="Motor Plakası" required>
+            <button type="submit">Sisteme Kaydol</button>
+        </form>
+    </div>
+</body>
+</html>
