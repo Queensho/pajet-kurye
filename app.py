@@ -1,56 +1,54 @@
-import os
-import sqlite3
-from flask import Flask, render_template, request, redirect, url_for
+import os, sqlite3
+from flask import Flask, render_template, request, jsonify, redirect
 
 app = Flask(__name__)
-
-# Render'da veritabanının düzgün çalışması için geçici klasör kullanıyoruz
 DB_PATH = '/tmp/kurye_sistemi.db'
 
-def init_db():
+def get_db():
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS kuryeler (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            isim TEXT NOT NULL,
-            tel TEXT NOT NULL,
-            plaka TEXT NOT NULL,
-            durum TEXT DEFAULT 'Onay Bekliyor'
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    conn.row_factory = sqlite3.Row
+    return conn
 
-# Uygulama başladığında tabloyu oluştur
-init_db()
+# Veritabanını yeni sütunlarla (lat, lng, paket) güncelleme
+with get_db() as conn:
+    conn.execute('''CREATE TABLE IF NOT EXISTS kuryeler 
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, isim TEXT, tel TEXT, plaka TEXT, 
+         durum TEXT DEFAULT "Onay Bekliyor", lat REAL, lng REAL, paket_sayisi INTEGER DEFAULT 0)''')
 
 @app.route('/')
 def index():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    kuryeler = conn.execute('SELECT * FROM kuryeler').fetchall()
-    conn.close()
+    with get_db() as conn:
+        kuryeler = conn.execute('SELECT * FROM kuryeler').fetchall()
     return render_template('index.html', kuryeler=kuryeler)
+
+# Kurye uygulamasından gelen canlı konum ve paket verisi
+@app.route('/update_data', methods=['POST'])
+def update_data():
+    data = request.json
+    with get_db() as conn:
+        conn.execute('UPDATE kuryeler SET lat = ?, lng = ?, paket_sayisi = ? WHERE id = ?',
+                     (data['lat'], data['lng'], data['paket'], data['id']))
+        conn.commit()
+    return jsonify({"status": "success"})
 
 @app.route('/kayit', methods=['GET', 'POST'])
 def kayit():
     if request.method == 'POST':
-        isim = request.form.get('isim')
-        tel = request.form.get('tel')
-        plaka = request.form.get('plaka')
-        
-        if isim and tel and plaka:
-            conn = sqlite3.connect(DB_PATH)
+        with get_db() as conn:
             conn.execute('INSERT INTO kuryeler (isim, tel, plaka) VALUES (?, ?, ?)', 
-                         (isim, tel, plaka))
-            conn.commit()
-            conn.close()
-            return "<h1>Kayıt Başarılı!</h1><p>Yönetici paneline yönlendiriliyorsunuz...</p><script>setTimeout(function(){window.location.href='/';}, 3000);</script>"
-        return "Lütfen tüm alanları doldurun!", 400
-        
+                         (request.form['isim'], request.form['tel'], request.form['plaka']))
+        return "<h1>Kayıt Alındı!</h1><script>setTimeout(()=> window.location.href='/', 2000);</script>"
     return render_template('kayit.html')
 
+@app.route('/islem/<int:id>', methods=['POST'])
+def islem(id):
+    aksiyon = request.form.get('aksiyon')
+    with get_db() as conn:
+        if aksiyon == 'onayla':
+            conn.execute('UPDATE kuryeler SET durum = "Aktif" WHERE id = ?', (id,))
+        elif aksiyon == 'sil':
+            conn.execute('DELETE FROM kuryeler WHERE id = ?', (id,))
+    return redirect('/')
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
