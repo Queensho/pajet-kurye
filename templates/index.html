@@ -1,59 +1,18 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pajet Yönetim</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <style>
-        body { font-family: sans-serif; background: #0f172a; color: white; margin: 0; padding-bottom: 50px; }
-        #map { height: 250px; width: 100%; border-bottom: 2px solid #1e293b; }
-        .container { padding: 15px; }
-        .card { background: #1e293b; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; border: 1px solid #334155; }
-        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-        .status-wait { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .status-active { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-        .pkg-val { font-size: 24px; color: #22c55e; font-weight: bold; text-align: center; }
-        .btn { padding: 8px 15px; border-radius: 8px; border: none; color: white; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-ok { background: #22c55e; width: 100%; }
-        .btn-del { background: #ef4444; width: 100%; margin-top: 5px; }
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <div class="container">
-        <h3><i class="fa-solid fa-bolt"></i> Pajet Operasyon</h3>
-        {% for kurye in kuryeler %}
-        <div class="card">
-            <div style="flex:2;">
-                <b>{{ kurye['isim'] }}</b><br>
-                <small style="color:#94a3b8;">{{ kurye['plaka'] }}</small><br>
-                <span class="status-badge {% if kurye['durum'] == 'Aktif' %}status-active{% else %}status-wait{% endif %}">
-                    {{ kurye['durum'] }}
-                </span>
-                <form action="/islem/{{ kurye['id'] }}" method="POST">
-                    {% if kurye['durum'] != 'Aktif' %}
-                    <button name="aksiyon" value="onayla" class="btn btn-ok">ONAYLA</button>
-                    {% endif %}
-                    <button name="aksiyon" value="sil" class="btn btn-del">SİL</button>
-                </form>
-            </div>
-            <div style="flex:1; text-align:right;">
-                <div class="pkg-val">{{ kurye['paket_sayisi'] or 0 }}</div>
-                <small style="color:#94a3b8;">PAKET</small>
-            </div>
+<div class="container">
+    <h3><i class="fa-solid fa-layer-group"></i> Gönderi Havuzu</h3>
+    {% for is in gonderiler %}
+    <div class="card" style="border-left: 5px solid #f59e0b;">
+        <div style="flex:2;">
+            <b>📍 {{ is['alici_adres'] }}</b><br>
+            <small>🏁 Hedef: {{ is['gidilecek_yer'] }}</small><br>
+            <small>📞 {{ is['tel'] }}</small>
         </div>
-        {% endfor %}
+        <div style="flex:1; text-align:right;">
+            <div class="pkg-val" style="color:#f59e0b;">{{ is['fiyat'] }}₺</div>
+            <button class="status-badge" style="background:#f59e0b; color:white; border:none; cursor:pointer;">ATA</button>
+        </div>
     </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        var map = L.map('map').setView([41.0082, 28.9784], 12);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-        {% for kurye in kuryeler %}{% if kurye['lat'] %}
-            L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}]).addTo(map).bindPopup("{{ kurye['isim'] }}");
-        {% endif %}{% endfor %}
-    </script>
-</body>
-</html>
+    {% else %}
+    <p style="color:#94a3b8; text-align:center;">Havuzda bekleyen gönderi yok.</p>
+    {% endfor %}
+</div>
