@@ -5,23 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pajet Operasyon Merkezi</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f7f6; }
-        #map { height: 350px; width: 100%; z-index: 1; border-bottom: 3px solid #2c3e50; }
-        .container { padding: 15px; max-width: 900px; margin: auto; }
-        .kurye-card { 
-            background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #2ecc71;
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
         }
-        .info b { font-size: 1.2em; color: #2c3e50; display: block; }
-        .info span { color: #7f8c8d; font-size: 0.9em; }
-        .stats { text-align: right; }
-        .pkg-count { font-size: 1.5em; font-weight: bold; color: #27ae60; }
-        .btn-group { margin-top: 10px; }
-        button { cursor: pointer; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; }
-        .btn-approve { background: #2ecc71; color: white; }
-        .btn-delete { background: #e74c3c; color: white; margin-left: 5px; }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); margin: 0; }
+        
+        /* Harita Tasarımı */
+        #map { height: 300px; width: 100%; filter: hue-rotate(180s) brightness(0.8) contrast(1.2); }
+
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        
+        h2 { font-size: 1.2rem; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+
+        /* Kurye Kartları */
+        .kurye-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .info b { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+        .info span { color: #94a3b8; font-size: 0.85rem; }
+
+        /* Durum Etiketleri */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 8px;
+            display: inline-block;
+        }
+        .badge-aktif { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+        .badge-bekliyor { background: rgba(245, 158, 11, 0.2); color: var(--accent-yellow); }
+
+        /* Paket Sayısı */
+        .stats { text-align: center; }
+        .pkg-number { font-size: 2rem; font-weight: 800; color: var(--accent-green); line-height: 1; }
+        .pkg-label { font-size: 0.7rem; color: #94a3b8; }
+
+        /* Butonlar */
+        .actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; }
+        .btn-approve { background: var(--accent-green); }
+        .btn-delete { background: var(--accent-red); }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -29,44 +72,40 @@
 <div id="map"></div>
 
 <div class="container">
-    <h2>🚚 Kurye Takip ve Paket Sayıları</h2>
-    
+    <h2><i class="fa-solid fa-motorcycle"></i> Aktif Kuryeler ve Paket Takibi</h2>
+
     {% for kurye in kuryeler %}
     <div class="kurye-card">
         <div class="info">
             <b>{{ kurye['isim'] }}</b>
-            <span>Plaka: {{ kurye['plaka'] }} | Durum: {{ kurye['durum'] }}</span>
-            <div class="btn-group">
-                <form action="/islem/{{ kurye['id'] }}" method="POST">
-                    <button name="aksiyon" value="onayla" class="btn-approve">Onayla</button>
-                    <button name="aksiyon" value="sil" class="btn-delete" onclick="return confirm('Silmek istediğine emin misin?')">Sil</button>
-                </form>
+            <span>{{ kurye['plaka'] }}</span><br>
+            <div class="badge {% if kurye['durum'] == 'Aktif' %}badge-aktif{% else %}badge-bekliyor{% endif %}">
+                {{ kurye['durum'] }}
             </div>
+            
+            <form action="/islem/{{ kurye['id'] }}" method="POST" class="actions">
+                <button name="aksiyon" value="onayla" class="btn btn-approve">Onayla</button>
+                <button name="aksiyon" value="sil" class="btn btn-delete">Sil</button>
+            </form>
         </div>
+
         <div class="stats">
-            <div class="pkg-count">{{ kurye['paket_sayisi'] if kurye['paket_sayisi'] else 0 }}</div>
-            <small>Paket</small>
+            <div class="pkg-number">{{ kurye['paket_sayisi'] if kurye['paket_sayisi'] else 0 }}</div>
+            <div class="pkg-label">PAKET</div>
         </div>
     </div>
-    {% else %}
-    <p>Henüz kayıtlı kurye bulunmuyor.</p>
     {% endfor %}
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Haritayı İstanbul merkezli başlat
-    var map = L.map('map').setView([41.0082, 28.9784], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+    var map = L.map('map', { zoomControl: false }).setView([41.0082, 28.9784], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-    // Kuryeleri haritaya ekle (Hata almaması için veri kontrolü eklendi)
     {% for kurye in kuryeler %}
-        {% if kurye['lat'] and kurye['lng'] %}
-            L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}])
-                .addTo(map)
-                .bindPopup("<b>{{ kurye['isim'] }}</b><br>Paket: {{ kurye['paket_sayisi'] }}");
+        {% if kurye['lat'] %}
+            L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}]).addTo(map)
+             .bindPopup("<b>{{ kurye['isim'] }}</b>");
         {% endif %}
     {% endfor %}
 </script>
