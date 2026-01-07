@@ -1,50 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-    <title>Pajet Operasyon Merkezi</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <title>Pajet Operasyon Merkezi</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: sans-serif; margin: 0; background: #f0f2f5; }
-        #map { height: 400px; width: 100%; border-bottom: 4px solid #2c3e50; }
-        .stats-container { padding: 20px; }
-        .kurye-card { background: white; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .badge { background: #3498db; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
-        .package-count { font-size: 24px; font-weight: bold; color: #2ecc71; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f7f6; }
+        #map { height: 350px; width: 100%; z-index: 1; border-bottom: 3px solid #2c3e50; }
+        .container { padding: 15px; max-width: 900px; margin: auto; }
+        .kurye-card { 
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-left: 5px solid #2ecc71;
+        }
+        .info b { font-size: 1.2em; color: #2c3e50; display: block; }
+        .info span { color: #7f8c8d; font-size: 0.9em; }
+        .stats { text-align: right; }
+        .pkg-count { font-size: 1.5em; font-weight: bold; color: #27ae60; }
+        .btn-group { margin-top: 10px; }
+        button { cursor: pointer; border: none; padding: 8px 12px; border-radius: 5px; font-weight: bold; }
+        .btn-approve { background: #2ecc71; color: white; }
+        .btn-delete { background: #e74c3c; color: white; margin-left: 5px; }
     </style>
 </head>
 <body>
-    <div id="map"></div>
+
+<div id="map"></div>
+
+<div class="container">
+    <h2>🚚 Kurye Takip ve Paket Sayıları</h2>
     
-    <div class="stats-container">
-        <h2>🚚 Aktif Kuryeler ve Paket Takibi</h2>
-        {% for kurye in kuryeler %}
-        <div class="kurye-card">
-            <div>
-                <strong>{{ kurye['isim'] }}</strong> <span class="badge">{{ kurye['durum'] }}</span>
-                <br><span>{{ kurye['plaka'] }}</span>
-            </div>
-            <div style="text-align: right;">
-                <div class="package-count">{{ kurye['paket_sayisi'] }}</div>
-                <small>Tamamlanan Paket</small>
+    {% for kurye in kuryeler %}
+    <div class="kurye-card">
+        <div class="info">
+            <b>{{ kurye['isim'] }}</b>
+            <span>Plaka: {{ kurye['plaka'] }} | Durum: {{ kurye['durum'] }}</span>
+            <div class="btn-group">
+                <form action="/islem/{{ kurye['id'] }}" method="POST">
+                    <button name="aksiyon" value="onayla" class="btn-approve">Onayla</button>
+                    <button name="aksiyon" value="sil" class="btn-delete" onclick="return confirm('Silmek istediğine emin misin?')">Sil</button>
+                </form>
             </div>
         </div>
-        {% endfor %}
+        <div class="stats">
+            <div class="pkg-count">{{ kurye['paket_sayisi'] if kurye['paket_sayisi'] else 0 }}</div>
+            <small>Paket</small>
+        </div>
     </div>
+    {% else %}
+    <p>Henüz kayıtlı kurye bulunmuyor.</p>
+    {% endfor %}
+</div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        var map = L.map('map').setView([41.0082, 28.9784], 11); // İstanbul merkezli
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Haritayı İstanbul merkezli başlat
+    var map = L.map('map').setView([41.0082, 28.9784], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-        // Kurye verilerini haritaya işaretle
-        {% for kurye in kuryeler %}
-            {% if kurye['lat'] %}
-                L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}])
-                 .addTo(map)
-                 .bindPopup("<b>{{ kurye['isim'] }}</b><br>Paket: {{ kurye['paket_sayisi'] }}");
-            {% endif %}
-        {% endfor %}
-    </script>
+    // Kuryeleri haritaya ekle (Hata almaması için veri kontrolü eklendi)
+    {% for kurye in kuryeler %}
+        {% if kurye['lat'] and kurye['lng'] %}
+            L.marker([{{ kurye['lat'] }}, {{ kurye['lng'] }}])
+                .addTo(map)
+                .bindPopup("<b>{{ kurye['isim'] }}</b><br>Paket: {{ kurye['paket_sayisi'] }}");
+        {% endif %}
+    {% endfor %}
+</script>
+
 </body>
 </html>
