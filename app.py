@@ -27,15 +27,28 @@ def kurye_panel():
         havuz = conn.execute('SELECT * FROM gonderiler WHERE durum = "Havuzda"').fetchall()
     return render_template('kurye_ekrani.html', kurye=kurye, havuz=havuz)
 
-@app.route('/is_al/<int:id>')
-def is_al(id):
-    if 'kurye_id' in session:
-        with get_db() as conn:
-            # İşi kapma mantığı (Race Condition kontrolü)
-            conn.execute('UPDATE gonderiler SET durum = "Aktif", kurye_id = ? WHERE id = ? AND durum = "Havuzda"', 
-                         (session['kurye_id'], id))
-            conn.commit()
-    return redirect('/kurye_panel')
+# app.py dosyasının içine yapıştırılacak bölüm:
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+@app.route('/is_al/<int:id>', methods=['POST'])
+def is_al(id):
+    # 1. Giriş yapan kuryeyi kontrol et
+    kurye_id = session.get('kurye_id')
+    if not kurye_id:
+        return jsonify({'status': 'error', 'message': 'Lütfen önce giriş yapın'}), 401
+
+    with get_db() as conn:
+        # 2. İşin hala havuzda olup olmadığını (başkası kapmış mı) kontrol et
+        is_durumu = conn.execute('SELECT durum FROM gonderiler WHERE id = ?', (id,)).fetchone()
+        
+        if is_durumu and is_durumu['durum'] == 'Havuzda':
+            # 3. İşi bu kuryeye ata ve durumu güncelle
+            conn.execute('UPDATE gonderiler SET durum = "Aktif", kurye_id = ? WHERE id = ?', (kurye_id, id))
+            conn.commit()
+
+            # 4. KRİTİK NOKTA: Diğer kuryelerin ekranından silmek için sinyal gönder
+            socketio.emit('is_sil_sinyali', {'id': id})
+            
+            return jsonify({'status': 'success', 'message': 'İş başarıyla kapıldı!'})
+        else:
+            # İş zaten başkası tarafından alınmışsa hata döndür
+            return jsonify({'status': 'error', 'message': 'Geç kaldınız, bu iş çoktan kapıldı!'}), 400
